@@ -42,3 +42,12 @@ android {
 flutter {
     source = "../.."
 }
+
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.android.application'
+
+dependencies {
+    implementation platform('com.google.firebase:firebase-bom:33.7.0') // Firebase BOM
+    implementation 'com.google.firebase:firebase-auth'                // Firebase Auth
+    implementation 'com.google.android.gms:play-services-auth:21.3.0' // Google Sign-In
+}
