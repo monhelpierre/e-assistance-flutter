@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/services/session.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -18,6 +20,21 @@ class _CalendarPageState extends State<CalendarPage> {
     5: ['Labor Day'],
     12: ['Christmas'],
   };
+
+  final SessionManager _sessionManager = SessionManager();
+  UserModel? session = null;
+
+  @override
+  void initState() async{
+    super.initState();
+
+    UserModel? session = await _sessionManager.getSession();
+    if(session == null){
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }else{
+      this.session = session;
+    }
+  }
 
   // Function to change month
   void _changeMonth(int change) {

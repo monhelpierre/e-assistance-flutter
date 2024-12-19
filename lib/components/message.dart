@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/services/session.dart';
 
 class MessagePage extends StatefulWidget {
   const MessagePage({super.key});
@@ -16,6 +18,21 @@ class _MessagePageState extends State<MessagePage> {
     {"sender": "admin", "message": "Hello! How can I assist you today?"},
     {"sender": "user", "message": "I need help with my account."},
   ];
+
+  final SessionManager _sessionManager = SessionManager();
+  UserModel? session = null;
+
+  @override
+  void initState() async{
+    super.initState();
+
+    UserModel? session = await _sessionManager.getSession();
+    if(session == null){
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }else{
+      this.session = session;
+    }
+  }
 
   // Function to send a new message
   void _sendMessage() {

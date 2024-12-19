@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eassistance/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:eassistance/components/analytic.dart';
 import 'package:eassistance/components/calendar.dart';
@@ -6,21 +6,42 @@ import 'package:eassistance/components/message.dart';
 import 'package:eassistance/components/notification.dart';
 import 'package:eassistance/components/report.dart';
 import 'package:eassistance/components/taks.dart';
+import 'package:eassistance/services/session.dart';
+import 'package:eassistance/components/loading.dart';
 
 class HomePage extends StatefulWidget {
-  final User? user;
   final Function(int) updateIndex;
-
-  const HomePage({super.key, required this.user, required this.updateIndex});
+  const HomePage({super.key, required this.updateIndex});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  final SessionManager _sessionManager = SessionManager();
+  UserModel? session = null;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+    if(session == null){
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }else{
+      setState(() {
+        this.session = session;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+
+    return this.session != null? Scaffold(
       appBar: AppBar(
         title: Text('Dashboard'),
       ),
@@ -42,19 +63,19 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundImage: NetworkImage('${widget.user?.photoURL}'), // Example profile image
+                        backgroundImage: NetworkImage('${session?.photoURL}'), // Example profile image
                       ),
                       SizedBox(width: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${widget.user?.displayName}',
+                            '${session?.displayName}',
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            '${widget.user?.email}',
+                            '${session?.email}',
                             style: TextStyle(color: Colors.grey[600]),
                           ),
                         ],
@@ -135,7 +156,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-    );
+    ) : LoadingPage();
   }
 
   // Helper method to create dashboard cards

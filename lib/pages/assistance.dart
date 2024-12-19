@@ -1,9 +1,12 @@
 //import 'package:file_picker/file_picker.dart';
+import 'package:eassistance/components/loading.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/services/session.dart';
 
 class AssistancePage extends StatefulWidget {
-  final User? user;
+  User? user;
 
   final List<Map<String, dynamic>> requiredDocuments;
   final List<Map<String, dynamic>> previousAssistance = [
@@ -37,24 +40,27 @@ class AssistancePage extends StatefulWidget {
     },
   ];
 
-  AssistancePage({super.key, required this.user, required this.requiredDocuments});
+  AssistancePage({super.key, required this.requiredDocuments});
 
   @override
   _AssistancePageState createState() => _AssistancePageState();
 }
 
 class _AssistancePageState extends State<AssistancePage> {
+  UserModel? session = null;
+  String? selectedPaymentMethod;
   Map<String, List<String>> documentTasks = {};
   Map<String, bool> taskCompletionStatus = {};
   Map<String, bool> documentUploaded = {};
-  Map<String, String?> uploadedFiles = {}; // Track uploaded file names
-
+  Map<String, String?> uploadedFiles = {};
+  final SessionManager _sessionManager = SessionManager();
   List<String> paymentMethods = ["Kat Kredi", "PayPal", "Transfè Labank", "Moncash", "Pix"];
-  String? selectedPaymentMethod;
 
   @override
   void initState() {
     super.initState();
+
+    _checkSession();
 
     if (widget.requiredDocuments.isNotEmpty) {
       for (var doc in widget.requiredDocuments) {
@@ -68,9 +74,20 @@ class _AssistancePageState extends State<AssistancePage> {
     }
   }
 
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+    if (session == null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } else {
+      setState(() {
+        this.session = session;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return session != null? Scaffold(
       appBar: AppBar(
         title: Text(widget.requiredDocuments.isNotEmpty ? "Mande Asistans" : "Lis Asistans"),
       ),
@@ -135,7 +152,7 @@ class _AssistancePageState extends State<AssistancePage> {
           ],
         ),
       ),
-    );
+    ) : LoadingPage();
   }
 
   Widget buildDocumentCard(String doc, List<String> tasks) {

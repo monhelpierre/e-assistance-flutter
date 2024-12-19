@@ -1,18 +1,16 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eassistance/components/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:eassistance/pages/assistance.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/services/session.dart';
 
 class ProcessPage extends StatefulWidget {
-  final User? user;
-
-  const ProcessPage({super.key, required this.user});
-
   @override
   State<ProcessPage> createState() => _ProcessPageState();
 }
 
 class _ProcessPageState extends State<ProcessPage> {
-  // List of processes
+
   final List<Map<String, dynamic>> processes = [
     {
       "title": "Bous Lisans - Kanada",
@@ -80,9 +78,29 @@ class _ProcessPageState extends State<ProcessPage> {
     },
   ];
 
+  UserModel? session = null;
+  final SessionManager _sessionManager = SessionManager();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+    if (session == null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } else {
+      setState(() {
+        this.session = session;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return session != null? Scaffold(
       appBar: AppBar(
         title: Text('Pwosesis'),
       ),
@@ -118,8 +136,7 @@ class _ProcessPageState extends State<ProcessPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ProcessDetailsPage(
-                        process: process,
-                        user: widget.user
+                        process: process
                       ),
                     ),
                   );
@@ -129,15 +146,13 @@ class _ProcessPageState extends State<ProcessPage> {
           },
         ),
       ),
-    );
+    ) : LoadingPage();
   }
 }
 
 class ProcessDetailsPage extends StatelessWidget {
   final Map<String, dynamic> process;
-  final User? user;
-
-  const ProcessDetailsPage({super.key, required this.process, required this.user});
+  const ProcessDetailsPage({super.key, required this.process});
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +240,7 @@ class ProcessDetailsPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AssistancePage( user: this.user,
+                        builder: (context) => AssistancePage(
                           requiredDocuments: process['documents'],
                         ),
                       ),

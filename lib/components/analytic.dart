@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/services/session.dart';
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
@@ -16,6 +18,21 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     setState(() {
       _counter++;
     });
+  }
+
+  final SessionManager _sessionManager = SessionManager();
+  UserModel? session = null;
+
+  @override
+  void initState() async{
+    super.initState();
+
+    UserModel? session = await _sessionManager.getSession();
+    if(session == null){
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }else{
+      this.session = session;
+    }
   }
 
   @override

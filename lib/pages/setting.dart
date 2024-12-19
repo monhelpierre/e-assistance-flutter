@@ -1,29 +1,49 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eassistance/components/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/services/session.dart';
 
 class SettingPage extends StatefulWidget {
-  final User? user;
-
-  const SettingPage({super.key, required this.user});
-
   @override
   State<SettingPage> createState() => _SettingPageState();
 }
 
 class _SettingPageState extends State<SettingPage> {
-  // User information fields
   String? name;
   String? email;
   String? phone;
 
-  // Selected options
   String selectedProgram = "Imigrasyon";
   String selectedLevel = "Lisans";
 
+  final SessionManager _sessionManager = SessionManager();
+  UserModel? session = null;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+    if (session == null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } else {
+      setState(() {
+        this.session = session;
+      });
+    }
+  }
+
+  Future<void> _signOut() async {
+    await _sessionManager.clearSession();
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
+    return session != null? Scaffold(
       appBar: AppBar(
         title: Text('Paramèt'),
       ),
@@ -33,19 +53,19 @@ class _SettingPageState extends State<SettingPage> {
           children: [
             // Section: User Info
             buildSectionTitle("Enfòmasyon Itilizatè"),
-            buildTextField("Non", widget.user?.displayName, (value) {
+            buildTextField("Non", session?.displayName, (value) {
               setState(() {
                 name = value;
               });
             }),
             SizedBox(height: 12),
-            buildTextField("Imel", widget.user?.email, (value) {
+            buildTextField("Imel", session?.email, (value) {
               setState(() {
                 email = value;
               });
             }),
             SizedBox(height: 12),
-            buildTextField("Telefòn", widget.user?.phoneNumber, (value) {
+            buildTextField("Telefòn", session?.phoneNumber, (value) {
               setState(() {
                 phone = value;
               });
@@ -99,10 +119,27 @@ class _SettingPageState extends State<SettingPage> {
               },
               child: Text("Anrejistre Paramèt"),
             ),
+
+            SizedBox(height: 20),
+
+            // Sign Out Button
+            ElevatedButton(
+              onPressed: () {
+                _signOut();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Button color
+                padding: EdgeInsets.symmetric(vertical: 15),
+              ),
+              child: Text(
+                "Dekonekte",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           ],
         ),
       ),
-    );
+    ) : LoadingPage();
   }
 
   // Build a section title
@@ -129,7 +166,7 @@ class _SettingPageState extends State<SettingPage> {
       ),
       controller: TextEditingController(text: initialValue)
         ..selection = TextSelection.fromPosition(
-            TextPosition(offset: initialValue != null? initialValue.length : 0)),
+            TextPosition(offset: initialValue != null ? initialValue.length : 0)),
       onChanged: onChanged,
     );
   }
@@ -165,3 +202,4 @@ class _SettingPageState extends State<SettingPage> {
     );
   }
 }
+

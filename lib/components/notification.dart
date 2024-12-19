@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/services/session.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -15,6 +17,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
     {"type": "New Message", "message": "You have a new message from the admin."},
     {"type": "Assistance Feedback", "message": "Feedback has been received for your assistance request."},
   ];
+
+  final SessionManager _sessionManager = SessionManager();
+  UserModel? session = null;
+
+  @override
+  void initState() async{
+    super.initState();
+
+    UserModel? session = await _sessionManager.getSession();
+    if(session == null){
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }else{
+      this.session = session;
+    }
+  }
 
   // Function to add a new notification
   void _addNotification(String type, String message) {

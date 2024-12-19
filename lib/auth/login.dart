@@ -1,7 +1,9 @@
+import 'package:eassistance/components/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:eassistance/services/session.dart';
+import 'package:eassistance/models/user.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,7 +13,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final SessionManager _sessionManager = SessionManager();
-  UserModel? _storedSessionData;
+  bool notCheckingSession = false;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -22,14 +24,19 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _loadSessionData();
+    _checkSession();
   }
 
-  Future<void> _loadSessionData() async {
-    //UserModel? session = await _sessionManager.getSession();
-    //setState(() {
-      //_storedSessionData = session;
-    //});
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+
+    if (session != null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    }else{
+      setState(() {
+        notCheckingSession = true;
+      });
+    }
   }
 
   Future<User?> signInWithEmailPassword(BuildContext context) async {
@@ -81,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
       final User? user = userCredential.user;
 
       if (user != null) {
-        //_sessionManager.saveSession(user);
+        _sessionManager.saveSession(user);
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false, arguments: user);
       }else{
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,12 +111,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
 
-    if(_storedSessionData != null){
-      //print(_storedSessionData);
-      //Navigator.pushReplacementNamed(context, '/');
-    }
-
-    return Scaffold(
+    return notCheckingSession ? Scaffold(
       backgroundColor: Colors.grey,
       body: SingleChildScrollView(
         child: Padding(
@@ -211,6 +213,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
-    );
+    ) : LoadingPage();
   }
 }

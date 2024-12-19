@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/services/session.dart';
 
 class ReportPage extends StatefulWidget {
   const ReportPage({super.key});
@@ -15,6 +17,21 @@ class _ReportPageState extends State<ReportPage> {
     {"title": "User Engagement", "description": "Report on user engagement across the platform."},
     {"title": "System Performance", "description": "Overview of system performance metrics."},
   ];
+
+  final SessionManager _sessionManager = SessionManager();
+  UserModel? session = null;
+
+  @override
+  void initState() async{
+    super.initState();
+
+    UserModel? session = await _sessionManager.getSession();
+    if(session == null){
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }else{
+      this.session = session;
+    }
+  }
 
   // Function to simulate adding a new report
   void _addReport(String title, String description) {

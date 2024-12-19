@@ -1,10 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eassistance/components/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/services/session.dart';
 
 class PaymentPage extends StatefulWidget {
-  final User? user;
-  const PaymentPage({super.key, required this.user});
-
   @override
   State<PaymentPage> createState() => _PaymentPageState();
 }
@@ -35,9 +34,29 @@ class _PaymentPageState extends State<PaymentPage> {
     },
   ];
 
+  UserModel? session = null;
+  final SessionManager _sessionManager = SessionManager();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+    if (session == null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } else {
+      setState(() {
+        this.session = session;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return session != null? Scaffold(
       appBar: AppBar(
         title: Text('Lis Pèman'),
       ),
@@ -51,7 +70,7 @@ class _PaymentPageState extends State<PaymentPage> {
           },
         ),
       ),
-    );
+    ) : LoadingPage();
   }
 
   // Build individual payment card

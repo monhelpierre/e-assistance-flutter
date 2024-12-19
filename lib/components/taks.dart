@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 //import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/services/session.dart';
 
 class TaskPage extends StatefulWidget {
   const TaskPage({super.key});
@@ -25,6 +27,21 @@ class _TaskPageState extends State<TaskPage> {
     },
     // Add more tasks as needed
   ];
+
+  final SessionManager _sessionManager = SessionManager();
+  UserModel? session = null;
+
+  @override
+  void initState() async{
+    super.initState();
+
+    UserModel? session = await _sessionManager.getSession();
+    if(session == null){
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }else{
+      this.session = session;
+    }
+  }
 
   // Function to pick a document (image or file)
   Future<void> _pickDocument(int taskIndex) async {
