@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "90523262837",
+    "project_id": "e-consultation-9a834",
+    "storage_bucket": "e-consultation-9a834.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:90523262837:android:c1f03d5ef4875354d7bd3c",
+        "android_client_info": {
+          "package_name": "eassistance.codeminai.ht.eassistance"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "90523262837-2upuil4pa4ofv4teauddpueuoinjkhti.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "eassistance.codeminai.ht.eassistance",
+            "certificate_hash": "16ac3ef843233d64710c83f445ad098e66ad8bb3"
+          }
+        },
+        {
+          "client_id": "90523262837-7acrjkjqq6rrhtvj7f4cf5ebfq7inhav.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAb4-FMmbNjg07679wHjU0v7o_q5adnPbg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "90523262837-7acrjkjqq6rrhtvj7f4cf5ebfq7inhav.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
