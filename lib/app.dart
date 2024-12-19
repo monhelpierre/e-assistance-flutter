@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eassistance/pages/home.dart';
 import 'package:eassistance/pages/assistance.dart';
@@ -14,6 +15,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   int _currentIndex = 2;
+  User? user;
+
   late List<Widget> _pages;
 
   @override
@@ -21,24 +24,37 @@ class _MyAppState extends State<MyApp> {
     super.initState();
 
     _pages = [
-      ProcessPage(),
-      AssistancePage(requiredDocuments: []),
-      HomePage(updateIndex: (int index) {
+      ProcessPage(user:user),
+      AssistancePage(user:user, requiredDocuments: []),
+      HomePage(user:user, updateIndex: (int index) {
         setState(() {
           _currentIndex = index;
         });
       }),
-      PaymentPage(),
-      SettingPage(),
+      PaymentPage(user:user),
+      SettingPage(user:user),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    //final index = ModalRoute.of(context)!.settings.arguments as Map;
     final user = ModalRoute.of(context)?.settings.arguments;
 
-    print(user);
+    if(user is User){
+      setState(() {
+        _pages = [
+          ProcessPage(user:user),
+          AssistancePage(user:user, requiredDocuments: []),
+          HomePage(user:user, updateIndex: (int index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          }),
+          PaymentPage(user:user),
+          SettingPage(user:user),
+        ];
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(

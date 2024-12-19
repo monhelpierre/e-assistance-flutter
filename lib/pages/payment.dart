@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class PaymentPage extends StatefulWidget {
-  const PaymentPage({super.key});
+  final User? user;
+  const PaymentPage({super.key, required this.user});
 
   @override
   State<PaymentPage> createState() => _PaymentPageState();

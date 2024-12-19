@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eassistance/pages/assistance.dart';
 
 class ProcessPage extends StatefulWidget {
-  const ProcessPage({super.key});
+  final User? user;
+
+  const ProcessPage({super.key, required this.user});
 
   @override
   State<ProcessPage> createState() => _ProcessPageState();
@@ -116,6 +119,7 @@ class _ProcessPageState extends State<ProcessPage> {
                     MaterialPageRoute(
                       builder: (context) => ProcessDetailsPage(
                         process: process,
+                        user: widget.user
                       ),
                     ),
                   );
@@ -131,8 +135,9 @@ class _ProcessPageState extends State<ProcessPage> {
 
 class ProcessDetailsPage extends StatelessWidget {
   final Map<String, dynamic> process;
+  final User? user;
 
-  const ProcessDetailsPage({super.key, required this.process});
+  const ProcessDetailsPage({super.key, required this.process, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +225,7 @@ class ProcessDetailsPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AssistancePage(
+                        builder: (context) => AssistancePage( user: this.user,
                           requiredDocuments: process['documents'],
                         ),
                       ),

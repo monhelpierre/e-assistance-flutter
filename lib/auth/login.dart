@@ -58,33 +58,24 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> signInWithGoogle() async {
     try {
-      // Trigger the Google Sign-In flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
         return;
       }
 
-      // Obtain the Google Sign-In authentication details
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      // Create a credential for Firebase authentication
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Sign in to Firebase with the Google credential
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
-
-      // Get the signed-in user
       final User? user = userCredential.user;
 
       if (user != null) {
         //_sessionManager.saveSession(user);
-        Navigator.pushReplacementNamed(
-          context, '/', arguments: user,
-        );
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false, arguments: user);
       }
     } catch (error) {
       print('Error during Google Sign-In: $error');

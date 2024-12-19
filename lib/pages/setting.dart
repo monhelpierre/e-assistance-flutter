@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SettingPage extends StatefulWidget {
-  const SettingPage({super.key});
+  final User? user;
+
+  const SettingPage({super.key, required this.user});
 
   @override
   State<SettingPage> createState() => _SettingPageState();
@@ -9,9 +12,9 @@ class SettingPage extends StatefulWidget {
 
 class _SettingPageState extends State<SettingPage> {
   // User information fields
-  String name = "Faniel Frenat";
-  String email = "faniel.frenat@gmail.com";
-  String phone = "+55 27 98808-1642";
+  String? name;
+  String? email;
+  String? phone;
 
   // Selected options
   String selectedProgram = "Imigrasyon";
@@ -19,6 +22,7 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Paramèt'),
@@ -29,19 +33,19 @@ class _SettingPageState extends State<SettingPage> {
           children: [
             // Section: User Info
             buildSectionTitle("Enfòmasyon Itilizatè"),
-            buildTextField("Non", name, (value) {
+            buildTextField("Non", widget.user?.displayName, (value) {
               setState(() {
                 name = value;
               });
             }),
             SizedBox(height: 12),
-            buildTextField("Imel", email, (value) {
+            buildTextField("Imel", widget.user?.email, (value) {
               setState(() {
                 email = value;
               });
             }),
             SizedBox(height: 12),
-            buildTextField("Telefòn", phone, (value) {
+            buildTextField("Telefòn", widget.user?.phoneNumber, (value) {
               setState(() {
                 phone = value;
               });
@@ -102,11 +106,11 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   // Build a section title
-  Widget buildSectionTitle(String title) {
+  Widget buildSectionTitle(String? title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
-        title,
+        title as String,
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
@@ -117,7 +121,7 @@ class _SettingPageState extends State<SettingPage> {
 
   // Build a text field for user info
   Widget buildTextField(
-      String label, String initialValue, Function(String) onChanged) {
+      String label, String? initialValue, Function(String) onChanged) {
     return TextField(
       decoration: InputDecoration(
         labelText: label,
@@ -125,7 +129,7 @@ class _SettingPageState extends State<SettingPage> {
       ),
       controller: TextEditingController(text: initialValue)
         ..selection = TextSelection.fromPosition(
-            TextPosition(offset: initialValue.length)),
+            TextPosition(offset: initialValue != null? initialValue.length : 0)),
       onChanged: onChanged,
     );
   }

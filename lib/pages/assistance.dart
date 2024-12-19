@@ -1,7 +1,10 @@
 //import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AssistancePage extends StatefulWidget {
+  final User? user;
+
   final List<Map<String, dynamic>> requiredDocuments;
   final List<Map<String, dynamic>> previousAssistance = [
     {
@@ -34,7 +37,7 @@ class AssistancePage extends StatefulWidget {
     },
   ];
 
-  AssistancePage({super.key, required this.requiredDocuments});
+  AssistancePage({super.key, required this.user, required this.requiredDocuments});
 
   @override
   _AssistancePageState createState() => _AssistancePageState();

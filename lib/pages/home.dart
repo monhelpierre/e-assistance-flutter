@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eassistance/components/analytic.dart';
 import 'package:eassistance/components/calendar.dart';
@@ -7,9 +8,10 @@ import 'package:eassistance/components/report.dart';
 import 'package:eassistance/components/taks.dart';
 
 class HomePage extends StatefulWidget {
+  final User? user;
   final Function(int) updateIndex;
 
-  const HomePage({super.key, required this.updateIndex});
+  const HomePage({super.key, required this.user, required this.updateIndex});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -40,20 +42,19 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundImage: NetworkImage(
-                            'https://via.placeholder.com/150'), // Example profile image
+                        backgroundImage: NetworkImage('${widget.user?.photoURL}'), // Example profile image
                       ),
                       SizedBox(width: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'John Doe',
+                            '${widget.user?.displayName}',
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            'john.doe@gmail.com',
+                            '${widget.user?.email}',
                             style: TextStyle(color: Colors.grey[600]),
                           ),
                         ],
