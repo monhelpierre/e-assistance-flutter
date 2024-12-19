@@ -8,14 +8,13 @@ import 'package:eassistance/pages/setting.dart';
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  int _currentIndex = 2; // Initial index for Home
-  late List<Widget> _pages; // Declare _pages without initializing it
+  int _currentIndex = 2;
+  late List<Widget> _pages;
 
   @override
   void initState() {
@@ -36,51 +35,53 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-
     //final index = ModalRoute.of(context)!.settings.arguments as Map;
+    final user = ModalRoute.of(context)?.settings.arguments;
+
+    print(user);
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('EASISTANS'),
+        title: Text('eassistance'),
         backgroundColor: Colors.grey[600],
       ),
-      body: _pages[_currentIndex], // Display selected page
+      body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.grey[60],
-        type: BottomNavigationBarType.fixed, // Keeps all icons visible
+        type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
-            _currentIndex = index; // Update selected index
+            _currentIndex = index;
           });
         },
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.work_outline), // Process icon
+            icon: Icon(Icons.work_outline),
             label: 'Pwosesis',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.support_agent), // Assistance icon
+            icon: Icon(Icons.support_agent),
             label: 'Asistans',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home, size: 30), // Home icon (center, larger)
+            icon: Icon(Icons.home, size: 30),
             label: 'Akèy',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.payment), // Payment icon
+            icon: Icon(Icons.payment),
             label: 'Pèman',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings), // User icon
+            icon: Icon(Icons.settings),
             label: 'Paramèt',
           ),
         ],
-        selectedItemColor: Colors.blue, // Color of the selected icon
-        unselectedItemColor: Colors.grey, // Color of unselected icons
-        showSelectedLabels: true, // Show labels for selected items
-        showUnselectedLabels: true, // Show labels for unselected items
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
       ),
     );
   }

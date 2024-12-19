@@ -3,6 +3,12 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    buildscript {
+        dependencies {
+            classpath 'com.google.gms:google-services:4.4.2'
+        }
+    }
 }
 
 rootProject.buildDir = "../build"
@@ -17,8 +23,3 @@ tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
 
-buildscript {
-    dependencies {
-        classpath 'com.google.gms:google-services:4.4.2' // Use the latest version
-    }
-}

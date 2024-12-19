@@ -1,30 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:eassistance/services/session.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
-
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  //final FirebaseAuth _auth = FirebaseAuth.instance;
-  //final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final SessionManager _sessionManager = SessionManager();
+  UserModel? _storedSessionData;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  // Function to handle Google Sign-In
-  /*Future<void> signInWithGoogle() async {
+  @override
+  void initState() {
+    super.initState();
+    _loadSessionData();
+  }
+
+  Future<void> _loadSessionData() async {
+    //UserModel? session = await _sessionManager.getSession();
+    //setState(() {
+      //_storedSessionData = session;
+    //});
+  }
+
+  Future<User?> signInWithEmailPassword(BuildContext context) async {
+    try {
+
+      String email = emailController.text.trim();
+      String password = passwordController.text.trim();
+
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      User? user =  userCredential.user;
+      Navigator.pop(context, '/');
+
+    } catch (e) {
+      print("Error during sign-in: $e");
+    }
+  }
+
+  Future<User?> getCurrentUser() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    return user;
+  }
+
+  Future<void> signInWithGoogle() async {
     try {
       // Trigger the Google Sign-In flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
-        // The user canceled the sign-in
         return;
       }
 
@@ -44,27 +81,27 @@ class _LoginPageState extends State<LoginPage> {
       final User? user = userCredential.user;
 
       if (user != null) {
-
-        // Navigate to the Home Page
-
+        //_sessionManager.saveSession(user);
+        Navigator.pushReplacementNamed(
+          context, '/', arguments: user,
+        );
       }
     } catch (error) {
       print('Error during Google Sign-In: $error');
     }
-  }*/
-
-  void loginUser() {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
-    Navigator.pop(context, '/'); // Navigate to home page
   }
 
-  void googleLogin() {
-    print('Google login clicked');
+  Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
   }
 
   @override
   Widget build(BuildContext context) {
+
+    if(_storedSessionData != null){
+      //print(_storedSessionData);
+      //Navigator.pushReplacementNamed(context, '/');
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey,
@@ -126,7 +163,11 @@ class _LoginPageState extends State<LoginPage> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          loginUser();
+                          if(emailController.text.isNotEmpty && passwordController.text.isNotEmpty){
+                            signInWithEmailPassword(context);
+                          }else{
+                            print("Password and Email should not be empty");
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
@@ -143,7 +184,7 @@ class _LoginPageState extends State<LoginPage> {
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          // Handle Google login logic
+                          signInWithGoogle();
                         },
                         icon: Image.asset(
                           'assets/google.png', // Add a Google logo asset
