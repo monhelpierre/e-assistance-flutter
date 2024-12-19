@@ -61,6 +61,13 @@ class _LoginPageState extends State<LoginPage> {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Erè koneksyon.",
+            ),
+          ),
+        );
         return;
       }
 
@@ -76,6 +83,14 @@ class _LoginPageState extends State<LoginPage> {
       if (user != null) {
         //_sessionManager.saveSession(user);
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false, arguments: user);
+      }else{
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Erè koneksyon.",
+            ),
+          ),
+        );
       }
     } catch (error) {
       print('Error during Google Sign-In: $error');
