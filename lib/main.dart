@@ -56,7 +56,7 @@ class _MyAppState extends State<MyApp> {
       appBar: AppBar(
         centerTitle: true,
         title: Text('eassistance'),
-        backgroundColor: Colors.grey[600],
+        backgroundColor: Colors.white,
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
