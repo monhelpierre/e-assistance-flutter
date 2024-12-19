@@ -21,18 +21,23 @@ class _CalendarPageState extends State<CalendarPage> {
     12: ['Christmas'],
   };
 
-  final SessionManager _sessionManager = SessionManager();
   UserModel? session = null;
+  final SessionManager _sessionManager = SessionManager();
 
   @override
-  void initState() async{
+  void initState() {
     super.initState();
+    _checkSession();
+  }
 
+  Future<void> _checkSession() async {
     UserModel? session = await _sessionManager.getSession();
-    if(session == null){
+    if (session == null) {
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-    }else{
-      this.session = session;
+    } else {
+      setState(() {
+        this.session = session;
+      });
     }
   }
 
