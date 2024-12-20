@@ -2,7 +2,7 @@
     package="eassistance.codeminai.ht.eassistance">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="eassistance"
+        android:label="Eassistance"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
