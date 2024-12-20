@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eassistance/models/user.dart';
-import 'package:eassistance/services/session.dart';
+import 'package:eassistance/constant/session.dart';
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
@@ -10,10 +10,8 @@ class AnalyticsPage extends StatefulWidget {
 }
 
 class _AnalyticsPageState extends State<AnalyticsPage> {
-  // Example state: counter for demonstration
   int _counter = 0;
 
-  // Function to update the state
   void _incrementCounter() {
     setState(() {
       _counter++;
@@ -52,9 +50,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Header for analytics page
             Text(
-              'Analytics Dashboard',
+              'Tablo Analitik',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -62,28 +59,25 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
             ),
             SizedBox(height: 20),
 
-            // Display some dynamic content
             Text(
-              'Total Views: $_counter',
+              'Vi Total: $_counter',
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(height: 20),
 
-            // Button to simulate a change in analytics data (counter)
             ElevatedButton(
               onPressed: _incrementCounter,
-              child: Text('Increase Views'),
+              child: Text('Ogmante kantite a'),
             ),
             SizedBox(height: 20),
 
-            // Example Graph or Chart Placeholder
             Container(
               width: double.infinity,
               height: 200,
               color: Colors.grey[200],
               child: Center(
                 child: Text(
-                  'Graph/Chart Goes Here',
+                  'Graf/Imaj la',
                   style: TextStyle(color: Colors.grey[600]),
                 ),
               ),

@@ -3,10 +3,30 @@ import 'package:firebase_auth/firebase_auth.dart';
 class UserModel {
   final String uid;
   final String? email;
+
   final String? displayName;
   final String? photoURL;
   final String? phoneNumber;
   final bool isAnonymous;
+
+  String? level;
+  String? defaultLang;
+  String? program;
+  bool? enableNotification = false;
+
+  /*
+  UserModel({
+    required this.uid,
+    this.email,
+    this.displayName,
+    this.photoURL,
+    this.phoneNumber,
+    this.defaultLang,
+    this.level,
+    this.program,
+    this.enableNotification,
+    required this.isAnonymous,
+  });*/
 
   UserModel({
     required this.uid,

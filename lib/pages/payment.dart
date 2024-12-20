@@ -1,7 +1,9 @@
-import 'package:eassistance/components/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:eassistance/models/user.dart';
-import 'package:eassistance/services/session.dart';
+import 'package:eassistance/constant/colors.dart';
+import 'package:eassistance/constant/session.dart';
+import 'package:eassistance/services/payment.dart';
+import 'package:eassistance/constant/loading.dart';
 
 class PaymentPage extends StatefulWidget {
   @override
@@ -9,32 +11,8 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  // Simulated list of payment data
-  final List<Map<String, dynamic>> payments = [
-    {
-      'service': 'Asistans Imigrasyon',
-      'amount': 200.00,
-      'date': '01-12-2024',
-      'status': 'Peye',
-      'details': 'Pèman pou sèvis asistans dokiman imigrasyon.'
-    },
-    {
-      'service': 'Applikasyon Viza',
-      'amount': 150.00,
-      'date': '25-11-2024',
-      'status': 'An atant',
-      'details': 'Pèman pou pwosesis frè aplikasyon viza.'
-    },
-    {
-      'service': 'Konsiltasyon Etid Aletranje',
-      'amount': 300.00,
-      'date': '20-11-2024',
-      'status': 'Echwe',
-      'details': 'Pèman konsiltasyon akademik ak preparasyon dokiman.'
-    },
-  ];
-
   UserModel? session = null;
+  final List<Map<String, dynamic>> payments = paymentsList;
   final SessionManager _sessionManager = SessionManager();
 
   @override
@@ -73,7 +51,6 @@ class _PaymentPageState extends State<PaymentPage> {
     ) : LoadingPage();
   }
 
-  // Build individual payment card
   Widget buildPaymentCard(Map<String, dynamic> payment) {
     return Card(
       elevation: 2,
@@ -98,7 +75,6 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  // Show payment details in a dialog
   void showPaymentDetails(Map<String, dynamic> payment) {
     showDialog(
       context: context,
@@ -136,40 +112,37 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  // Retry payment function (simulated)
   void retryPayment(Map<String, dynamic> payment) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          "Retrying payment for ${payment['service']}...",
+          "Reseye pèman pou ${payment['service']}...",
         ),
       ),
     );
 
-    // Simulate a retry process (replace with actual logic if needed)
     Future.delayed(Duration(seconds: 2), () {
       setState(() {
-        payment['status'] = 'Paid'; // Update payment status
+        payment['status'] = 'Peye'; // Update payment status
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Payment for ${payment['service']} was successful!"),
+          content: Text("Pèman pou ${payment['service']} fèt ak siksè!"),
         ),
       );
     });
   }
 
-  // Get color based on payment status
   Color getStatusColor(String status) {
     switch (status) {
       case 'Peye':
-        return Colors.green;
+        return completeColor;
       case 'An atant':
-        return Colors.orange;
+        return incompleteColor;
       case 'Echwe':
-        return Colors.red;
+        return errorColor;
       default:
-        return Colors.grey;
+        return defaultColor;
     }
   }
 }

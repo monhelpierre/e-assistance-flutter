@@ -1,13 +1,14 @@
-import 'package:eassistance/models/user.dart';
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/components/taks.dart';
+import 'package:eassistance/constant/colors.dart';
+import 'package:eassistance/constant/session.dart';
+import 'package:eassistance/constant/loading.dart';
+import 'package:eassistance/components/report.dart';
+import 'package:eassistance/components/message.dart';
 import 'package:eassistance/components/analytic.dart';
 import 'package:eassistance/components/calendar.dart';
-import 'package:eassistance/components/message.dart';
 import 'package:eassistance/components/notification.dart';
-import 'package:eassistance/components/report.dart';
-import 'package:eassistance/components/taks.dart';
-import 'package:eassistance/services/session.dart';
-import 'package:eassistance/components/loading.dart';
 
 class HomePage extends StatefulWidget {
   final Function(int) updateIndex;
@@ -18,8 +19,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final SessionManager _sessionManager = SessionManager();
   UserModel? session = null;
+  final SessionManager _sessionManager = SessionManager();
 
   @override
   void initState() {
@@ -76,7 +77,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           Text(
                             '${session?.email}',
-                            style: TextStyle(color: Colors.grey[600]),
+                            style: TextStyle(color: userInfoEmailColor),
                           ),
                         ],
                       ),
@@ -86,14 +87,12 @@ class _HomePageState extends State<HomePage> {
               ),
               SizedBox(height: 20),
 
-              // Dashboard Title
               Text(
                 'Aksyon Rapid',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
 
-              // Dashboard Menu Items
               GridView(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
@@ -107,47 +106,47 @@ class _HomePageState extends State<HomePage> {
                   _buildDashboardCard(
                       'Pwosesis',
                       Icons.work_outline,
-                      Colors.blue, context, null
+                      processMenuColor, context, null
                   ),
                   _buildDashboardCard(
                       'Asistans',
                       Icons.support_agent,
-                      Colors.orange, context, null
+                      assistanceMenuColor, context, null
                   ),
                   _buildDashboardCard(
                       'Rapò',
                       Icons.bar_chart,
-                      Colors.teal, context,
+                      reportMenuColor, context,
                       ReportPage()
                   ),
                   _buildDashboardCard(
                       'Notifikasyon',
                       Icons.notifications_active,
-                      Colors.red, context,
+                      notificationMenuColor, context,
                       NotificationsPage()
                   ),
                   _buildDashboardCard(
                       'Analitik',
                       Icons.analytics,
-                      Colors.indigo, context,
+                      analyticMenuColor, context,
                       AnalyticsPage()
                   ),
                   _buildDashboardCard(
                       'Kalandriye',
                       Icons.calendar_today,
-                      Colors.deepOrange, context,
+                      calendarMenuColor, context,
                       CalendarPage()
                   ),
                   _buildDashboardCard(
                       'Tach',
                       Icons.task_alt,
-                      Colors.cyan, context,
+                      taskMenuColor, context,
                       TaskPage()
                   ),
                   _buildDashboardCard(
                       'Mesaj',
                       Icons.message,
-                      Colors.pink, context,
+                      messageMenuColor, context,
                       MessagePage()
                   ),
                 ],
@@ -159,7 +158,6 @@ class _HomePageState extends State<HomePage> {
     ) : LoadingPage();
   }
 
-  // Helper method to create dashboard cards
   Widget _buildDashboardCard(String title, IconData icon, Color color, BuildContext context, Widget? page) {
     return GestureDetector(
       onTap: () {

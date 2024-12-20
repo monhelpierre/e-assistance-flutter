@@ -1,7 +1,8 @@
-import 'package:eassistance/components/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:eassistance/models/user.dart';
-import 'package:eassistance/services/session.dart';
+import 'package:eassistance/constant/colors.dart';
+import 'package:eassistance/constant/loading.dart';
+import 'package:eassistance/constant/session.dart';
 
 class SettingPage extends StatefulWidget {
   @override
@@ -12,12 +13,13 @@ class _SettingPageState extends State<SettingPage> {
   String? name;
   String? email;
   String? phone;
-
-  String selectedProgram = "Imigrasyon";
+  String defaultLang = "ht";
   String selectedLevel = "Lisans";
+  String selectedProgram = "Imigrasyon";
 
-  final SessionManager _sessionManager = SessionManager();
   UserModel? session = null;
+  bool? enableNotification = false;
+  final SessionManager _sessionManager = SessionManager();
 
   @override
   void initState() {
@@ -32,6 +34,7 @@ class _SettingPageState extends State<SettingPage> {
     } else {
       setState(() {
         this.session = session;
+        this.enableNotification = session.enableNotification;
       });
     }
   }
@@ -48,32 +51,34 @@ class _SettingPageState extends State<SettingPage> {
         title: Text('Paramèt'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: ListView(
           children: [
-            // Section: User Info
             buildSectionTitle("Enfòmasyon Itilizatè"),
             buildTextField("Non", session?.displayName, (value) {
               setState(() {
                 name = value;
               });
             }),
+
             SizedBox(height: 12),
+
             buildTextField("Imel", session?.email, (value) {
               setState(() {
                 email = value;
               });
             }),
+
             SizedBox(height: 12),
+
             buildTextField("Telefòn", session?.phoneNumber, (value) {
               setState(() {
                 phone = value;
               });
             }),
 
-            SizedBox(height: 20),
+            SizedBox(height: 12),
 
-            // Section: Program Selection
             buildSectionTitle("Seleksyon Pwogram"),
             buildDropdown(
               "Tip Pwogram",
@@ -85,7 +90,9 @@ class _SettingPageState extends State<SettingPage> {
                 });
               },
             ),
+
             SizedBox(height: 12),
+
             if (selectedProgram == "Pwogram Etid")
               buildDropdown(
                 "Study Level",
@@ -98,42 +105,55 @@ class _SettingPageState extends State<SettingPage> {
                 },
               ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 12),
 
-            // Section: Other Settings
+            buildSectionTitle("Lang Prensipal"),
+            buildDropdown(
+              "Lang",
+              ["ht", "fr", "pt", "en"],
+              defaultLang,
+                  (value) {
+                setState(() {
+                  defaultLang = value!;
+                });
+              },
+            ),
+            SizedBox(height: 12),
+
             buildSectionTitle("Lòt Paramèt"),
             SwitchListTile(
               title: Text("Aktive Notifikasyon"),
-              value: true,
+              value: this.enableNotification as bool,
               onChanged: (value) {
-                // Handle notification toggle
+                setState(() {
+                  this.enableNotification = ! (this.enableNotification as bool);
+                });
               },
             ),
-
             SizedBox(height: 20),
-
-            // Save Button
-            ElevatedButton(
-              onPressed: () {
-                saveSettings();
-              },
-              child: Text("Anrejistre Paramèt"),
-            ),
-
-            SizedBox(height: 20),
-
-            // Sign Out Button
-            ElevatedButton(
-              onPressed: () {
-                _signOut();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, // Button color
-                padding: EdgeInsets.symmetric(vertical: 15),
-              ),
-              child: Text(
-                "Dekonekte",
-                style: TextStyle(color: Colors.white),
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      saveSettings();
+                    },
+                    child: Text("Anrejistre Paramèt"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      _signOut();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: errorColor,
+                    ),
+                    child: Text(
+                      "Dekonekte",
+                      style: TextStyle(color: bgColor),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -142,7 +162,6 @@ class _SettingPageState extends State<SettingPage> {
     ) : LoadingPage();
   }
 
-  // Build a section title
   Widget buildSectionTitle(String? title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -156,7 +175,6 @@ class _SettingPageState extends State<SettingPage> {
     );
   }
 
-  // Build a text field for user info
   Widget buildTextField(
       String label, String? initialValue, Function(String) onChanged) {
     return TextField(
@@ -171,7 +189,6 @@ class _SettingPageState extends State<SettingPage> {
     );
   }
 
-  // Build a dropdown for program selection
   Widget buildDropdown(String label, List<String> options, String value,
       Function(String?) onChanged) {
     return DropdownButtonFormField<String>(
@@ -190,9 +207,7 @@ class _SettingPageState extends State<SettingPage> {
     );
   }
 
-  // Save settings function
   void saveSettings() {
-    // Simulate saving the settings
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -202,4 +217,3 @@ class _SettingPageState extends State<SettingPage> {
     );
   }
 }
-

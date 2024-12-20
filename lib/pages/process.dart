@@ -1,8 +1,10 @@
-import 'package:eassistance/components/loading.dart';
 import 'package:flutter/material.dart';
-import 'package:eassistance/pages/assistance.dart';
 import 'package:eassistance/models/user.dart';
-import 'package:eassistance/services/session.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:eassistance/constant/loading.dart';
+import 'package:eassistance/services/process.dart';
+import 'package:eassistance/pages/assistance.dart';
+import 'package:eassistance/constant/session.dart';
 
 class ProcessPage extends StatefulWidget {
   @override
@@ -10,76 +12,9 @@ class ProcessPage extends StatefulWidget {
 }
 
 class _ProcessPageState extends State<ProcessPage> {
-
-  final List<Map<String, dynamic>> processes = [
-    {
-      "title": "Bous Lisans - Kanada",
-      "type": "Opòtinite Etid",
-      "startDate": "15-01-2024",
-      "endDate": "30-04-2024",
-      "status": "Ankou",
-      "description":
-      "Yon pwogram bous pou etidyan entènasyonal kap chèche genyen yon lisans Kanada. Frè enskripsyon, kote pouw rete e yon montan chak mwa enkli.",
-      "documents": [
-        {"Paspò": ["Valid"]},
-        {"Relvedenòt Nivo Klasik": ["Legalize"]},
-        {"Tès Metriz Lang (IELTS/TOEFL)": ["Disponib"]},
-        {"Lèt Rekòmandayon": ["Disponib"]},
-        {"Pwopozisyon Pwojèt Etid": ["Disponib"]}
-      ],
-    },
-    {
-      "title": "Rechèch Doktora - Etazini",
-      "type": "Opòtinite Etid",
-      "startDate": "01-03-2024",
-      "endDate": "30-06-2024",
-      "status": "Fèmen",
-      "description":
-      "Yon pwogram rechèch doktora ak bous konplè nan Entelijans Atifisyèl ke yon gwo inivèsite Etazini ofri.",
-      "documents": [
-        {"Paspò":["Valid"]},
-        {"Relvedenòt Metriz":["Legalize"]},
-        {"CV":["Disponib"]},
-        {"Avan Pwojè":["Disponib"]},
-        {"Lèt Rekòmandasyon":["Disponib"]},
-      ],
-    },
-    {
-      "title": "Viza Travay - Almay",
-      "type": "Pwojè Imigrasyon",
-      "startDate": "01-02-2024",
-      "endDate": "31-12-2024",
-      "status": "Ankou",
-      "description":
-      "Yon pwogram imigrasyon pou travayè ki gen talan kap chèche opòtinite travay an Almay. Sponnsò viza enkli ak èd pou ede chanje peyi.",
-      "documents": [
-        {"Paspò" : ["Valid"]},
-        {"Sètifika Lisans": ["Legalize", "Notarye"]},
-        {"Kontra Travay": ["Disponib"]},
-        {"Pwèv Mwayen Finansman": ["Disponib"]},
-        {"Sètifika Lang (Alman/Anglè)" : ["Disponib"]},
-      ],
-    },
-    {
-      "title": "Echanj Etidyan - Lafrans",
-      "type": "Opòtinite Vwayaj",
-      "startDate": "01-09-2024",
-      "endDate": "30-06-2025",
-      "status": "Ankou",
-      "description":
-      "Yon pwogram kiltirèl e akademik pou etidyan pou eksperimante edikasyon ak kilti lafrans pou yon dire yon lane akademik.",
-      "documents": [
-        {"Paspò" : ["Valid"]},
-        {"Sètifika Enskripsyon": ["Disponib"]},
-        {"Tès Metriz Lang (Fransè/Anglè)": ["Disponib"]},
-        {"Lèt Motivasyon": ["Disponib"]},
-        {"Lèt Rekòmandasyon": ["Disponib"]},
-      ],
-    },
-  ];
-
   UserModel? session = null;
   final SessionManager _sessionManager = SessionManager();
+  final List<Map<String, dynamic>> processes = processesList;
 
   @override
   void initState() {
@@ -165,21 +100,18 @@ class ProcessDetailsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title of the Process
             Text(
               process['title'],
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
 
-            // Description
             Text(
               process['description'],
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 20),
 
-            // Details Section
             Text(
               "Details:",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -191,7 +123,6 @@ class ProcessDetailsPage extends StatelessWidget {
             Text("Stati: ${process['status']}"),
             SizedBox(height: 20),
 
-            // Required Documents Section
             Text(
               "Dokiman Egzije:",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -205,27 +136,23 @@ class ProcessDetailsPage extends StatelessWidget {
               );
             }).toList(),
             Spacer(),
-            // Buttons: Apply and Ask Assistance
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // Apply Button
                 ElevatedButton.icon(
-                  onPressed: () {
-                    // Check if the process has an apply link
+                  onPressed: () async{
                     final applyLink = process['applyLink'];
                     if (applyLink != null) {
-                      // Open the apply link
-                      launchURL(applyLink);
-                    } else {
-                      // Show a message if no link is available
+                      await launchUrl(Uri.parse(applyLink), mode: LaunchMode.platformDefault);
+                    } else if (applyLink == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Pa gen lyen pou enskri.")),
+                        SnackBar(content: Text("Lyen an poko pa disponib.")),
                       );
                     }
                   },
                   icon: Icon(Icons.open_in_new),
-                  label: Text("Aplike"),
+                  label: Text("Plis Enfo & Aplike"),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     shape: RoundedRectangleBorder(
@@ -234,17 +161,22 @@ class ProcessDetailsPage extends StatelessWidget {
                   ),
                 ),
 
-                // Ask Assistance Button
                 ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AssistancePage(
-                          requiredDocuments: process['documents'],
+                    if(process['applyLink'] == null){
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Wap jwenn asistans lè lyen pou enskri an disponib.")),
+                      );
+                    }else{
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AssistancePage(
+                            requiredDocuments: process['documents'],
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    }
                   },
                   icon: Icon(Icons.help_outline),
                   label: Text("Mande Asistans"),
@@ -261,10 +193,5 @@ class ProcessDetailsPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // Function to launch external URLs
-  void launchURL(String url) async {
-
   }
 }

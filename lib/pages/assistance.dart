@@ -1,44 +1,17 @@
-//import 'package:file_picker/file_picker.dart';
-import 'package:eassistance/components/loading.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:eassistance/models/user.dart';
-import 'package:eassistance/services/session.dart';
+import 'package:eassistance/constant/colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eassistance/constant/session.dart';
+import 'package:eassistance/services/payment.dart';
+import 'package:eassistance/constant/loading.dart';
+import 'package:eassistance/services/assistance.dart';
 
 class AssistancePage extends StatefulWidget {
   User? user;
-
   final List<Map<String, dynamic>> requiredDocuments;
-  final List<Map<String, dynamic>> previousAssistance = [
-    {
-      'processTitle': 'Process 1',
-      'documents': [
-        {
-          'documentName': 'Dokiman 1',
-          'isComplete': true,
-          'isFileUploaded': true,
-          'feedback': 'Good job, everything is in order.',
-        },
-        {
-          'documentName': 'Dokiman 2',
-          'isComplete': false,
-          'isFileUploaded': false,
-          'feedback': 'File is missing, please upload it.',
-        },
-      ],
-    },
-    {
-      'processTitle': 'Process 2',
-      'documents': [
-        {
-          'documentName': 'Dokiman 3',
-          'isComplete': true,
-          'isFileUploaded': false,
-          'feedback': 'File needs to be uploaded.',
-        },
-      ],
-    },
-  ];
+  final List<Map<String, dynamic>> previousAssistance = previousAssistanceList;
 
   AssistancePage({super.key, required this.requiredDocuments});
 
@@ -49,17 +22,15 @@ class AssistancePage extends StatefulWidget {
 class _AssistancePageState extends State<AssistancePage> {
   UserModel? session = null;
   String? selectedPaymentMethod;
-  Map<String, List<String>> documentTasks = {};
-  Map<String, bool> taskCompletionStatus = {};
   Map<String, bool> documentUploaded = {};
   Map<String, String?> uploadedFiles = {};
+  Map<String, bool> taskCompletionStatus = {};
+  Map<String, List<String>> documentTasks = {};
   final SessionManager _sessionManager = SessionManager();
-  List<String> paymentMethods = ["Kat Kredi", "PayPal", "Transfè Labank", "Moncash", "Pix"];
 
   @override
   void initState() {
     super.initState();
-
     _checkSession();
 
     if (widget.requiredDocuments.isNotEmpty) {
@@ -98,7 +69,7 @@ class _AssistancePageState extends State<AssistancePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Etap 1: Verifye Dokiman Obligatwa yo",
+              "Etap 1: Verifye Dokiman Egzije yo",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
@@ -183,22 +154,24 @@ class _AssistancePageState extends State<AssistancePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Telechaje Dokiman:", style: TextStyle(fontWeight: FontWeight.bold)),
-                  SizedBox(height: 10),
+                  SizedBox(height: 1),
                   ElevatedButton(
                     onPressed: () async {
-                      //FilePickerResult? result = await FilePicker.platform.pickFiles();
-                      //if (result != null) {
-                        //setState(() {
-                          //uploadedFiles[doc] = result.files.single.name;
-                          //documentUploaded[doc] = true;
-                        //});
-                      //}
+                      FilePickerResult? result = await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+                      );
+                      if (result != null) {
+                        setState(() {
+                          uploadedFiles[doc] = result.files.single.name;
+                          documentUploaded[doc] = true;
+                        });
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       minimumSize: Size(double.infinity, 50),
                     ),
-                    child: Text("Telechaje Dokiman"),
+                    child: Text("Chaje Dokiman an (pdf/jpg/jpeg/png)"),
                   ),
                 ],
               ),
@@ -209,7 +182,12 @@ class _AssistancePageState extends State<AssistancePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(uploadedFiles[doc]!, style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    uploadedFiles[doc]!.length > 25
+                        ? "${uploadedFiles[doc]!.substring(0, 25)}...${uploadedFiles[doc]!.split('.').last}" // Truncate and add the extension
+                        : uploadedFiles[doc]!,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   IconButton(
                     icon: Icon(Icons.close),
                     onPressed: () {
@@ -232,7 +210,7 @@ class _AssistancePageState extends State<AssistancePage> {
     List documents = assistance['documents'];
 
     bool isProcessComplete = documents.every((doc) => doc['isComplete']);
-    Color processColor = isProcessComplete ? Colors.green : Colors.orange;
+    Color processColor = isProcessComplete ? completeColor : incompleteColor;
 
     return Card(
       elevation: 2,
@@ -246,10 +224,10 @@ class _AssistancePageState extends State<AssistancePage> {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(doc['isComplete'] ? 'Dokiman konplete' : 'Dokiman inonplete'),
+                  Text(doc['isComplete'] ? 'Dokiman konplè' : 'Dokiman inkonplete'),
                   Text(doc['isFileUploaded'] ? 'Dokiman telechaje' : 'Dokiman pa telechaje'),
                   SizedBox(height: 8),
-                  Text("Feedback: ${doc['feedback']}", style: TextStyle(color: Colors.grey)),
+                  Text("Feedback: ${doc['feedback']}", style: TextStyle(color: userInfoEmailColor)),
                 ],
               ),
             );
@@ -260,17 +238,32 @@ class _AssistancePageState extends State<AssistancePage> {
   }
 
   bool shouldShowPayment() {
-    return widget.requiredDocuments.any((doc) {
+    bool hasIncompleteTasksWithoutUpload = widget.requiredDocuments.any((doc) {
       return doc.keys.any((docKey) {
         bool tasksNotChecked = documentTasks[docKey]!.any((task) =>
         !(taskCompletionStatus["$docKey-$task"] ?? false));
-        bool allTasksCheckedAndUploaded = documentTasks[docKey]!
-            .every((task) => taskCompletionStatus["$docKey-$task"] ?? false) &&
+
+        bool allTasksCheckedAndUploaded = documentTasks[docKey]!.every((task) =>
+        taskCompletionStatus["$docKey-$task"] ?? false) &&
             documentUploaded[docKey] == true;
 
-        return tasksNotChecked || allTasksCheckedAndUploaded;
+        return !tasksNotChecked && !documentUploaded[docKey]!;
       });
     });
+
+    if (hasIncompleteTasksWithoutUpload) {
+      return false;
+    }
+
+    bool allDocumentsCheckedAndUploaded = widget.requiredDocuments.every((doc) {
+      return doc.keys.every((docKey) {
+        return documentTasks[docKey]!.every((task) =>
+        taskCompletionStatus["$docKey-$task"] ?? false) &&
+            documentUploaded[docKey] == true;
+      });
+    });
+
+    return !hasIncompleteTasksWithoutUpload || allDocumentsCheckedAndUploaded;
   }
 
   void showPaymentConfirmation() {
