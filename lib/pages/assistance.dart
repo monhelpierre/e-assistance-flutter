@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:eassistance/models/user.dart';
@@ -6,12 +7,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eassistance/constant/session.dart';
 import 'package:eassistance/services/payment.dart';
 import 'package:eassistance/constant/loading.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:eassistance/services/assistance.dart';
 
 class AssistancePage extends StatefulWidget {
   User? user;
   final List<Map<String, dynamic>> requiredDocuments;
-  final List<Map<String, dynamic>> previousAssistance = previousAssistanceList;
 
   AssistancePage({super.key, required this.requiredDocuments});
 
@@ -26,6 +27,7 @@ class _AssistancePageState extends State<AssistancePage> {
   Map<String, String?> uploadedFiles = {};
   Map<String, bool> taskCompletionStatus = {};
   Map<String, List<String>> documentTasks = {};
+  final List<Map<String, dynamic>> _tasks = tasksList;
   final SessionManager _sessionManager = SessionManager();
 
   @override
@@ -39,7 +41,7 @@ class _AssistancePageState extends State<AssistancePage> {
           documentTasks[docName] = tasks;
           taskCompletionStatus[docName] = false;
           documentUploaded[docName] = false;
-          uploadedFiles[docName] = null; // Initialize as no file uploaded
+          uploadedFiles[docName] = null;
         });
       }
     }
@@ -56,11 +58,84 @@ class _AssistancePageState extends State<AssistancePage> {
     }
   }
 
+  Future<void> _pickDocument(int taskIndex, String docKey) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpeg', 'jpg', 'png'],
+    );
+
+    if (result != null) {
+
+      setState(() {
+        _tasks[taskIndex]['document'][docKey] = File(result.files.single.path!);
+      });
+    }
+  }
+
+  void _removeDocument(int taskIndex, String docKey) {
+    setState(() {
+      _tasks[taskIndex]['document'][docKey] = null as dynamic;
+    });
+  }
+
+  void _viewDocument(int taskIndex, String docKey) {
+    if (_tasks[taskIndex]['document'][docKey] != false) {
+      final file = _tasks[taskIndex]['document'][docKey];
+      final fileExtension = file.path.split('.').last.toLowerCase();
+
+      if (fileExtension == 'pdf') {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: Text("Gadel"),
+            content: Container(
+              height: 400,
+              child: PDFView(
+                filePath: file.path,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text("Fèmen"),
+              ),
+            ],
+          ),
+        );
+      } else if (['jpeg', 'jpg', 'png'].contains(fileExtension)) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: Text("Gadel"),
+            content: Image.file(file),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text("Fèmen"),
+              ),
+            ],
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Pa Gen Fichye")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return session != null? Scaffold(
+    return session != null
+        ? Scaffold(
       appBar: AppBar(
-        title: Text(widget.requiredDocuments.isNotEmpty ? "Mande Asistans" : "Lis Asistans"),
+        title: Text(widget.requiredDocuments.isNotEmpty
+            ? "Mande Asistans"
+            : "Lis Asistans"),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -70,14 +145,16 @@ class _AssistancePageState extends State<AssistancePage> {
           children: [
             Text(
               "Etap 1: Verifye Dokiman Egzije yo",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            ...widget.requiredDocuments.map((doc) {
-              return doc.entries.map((entry) {
-                return buildDocumentCard(entry.key, entry.value);
-              }).toList();
-            }).expand((x) => x),
+            ...widget.requiredDocuments
+                .map((doc) => doc.entries.map((entry) {
+              return buildDocumentCard(
+                  entry.key, entry.value);
+            }).toList())
+                .expand((x) => x),
             SizedBox(height: 30),
             if (shouldShowPayment())
               Column(
@@ -85,19 +162,22 @@ class _AssistancePageState extends State<AssistancePage> {
                 children: [
                   Text(
                     "Etap 2: Chwazi Metòd Pèman an",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 10),
-                  ...paymentMethods.map((method) => RadioListTile(
-                    title: Text(method),
-                    value: method,
-                    groupValue: selectedPaymentMethod,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedPaymentMethod = value;
-                      });
-                    },
-                  )),
+                  ...paymentMethods.map(
+                        (method) => RadioListTile(
+                      title: Text(method),
+                      value: method,
+                      groupValue: selectedPaymentMethod,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedPaymentMethod = value;
+                        });
+                      },
+                    ),
+                  ),
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: selectedPaymentMethod != null
@@ -114,16 +194,85 @@ class _AssistancePageState extends State<AssistancePage> {
               ),
           ],
         )
-            : Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...widget.previousAssistance.map((assistance) {
-              return buildPreviousAssistanceCard(assistance);
-            }),
-          ],
+            : Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ListView.builder(
+            physics: NeverScrollableScrollPhysics(), // Prevent ListView from scrolling
+            shrinkWrap: true, // Constrain ListView's height
+            itemCount: _tasks.length,
+            itemBuilder: (context, index) {
+              Map task = _tasks[index];
+              bool allDocumentsComplete = _tasks[index]['document']
+                  .values
+                  .every((dynamic isComplete) => isComplete != null);
+              return Card(
+                elevation: 2,
+                margin: EdgeInsets.symmetric(vertical: 8),
+                child: ExpansionTile(
+                  title: Text(
+                    task['title'],
+                    style: TextStyle(
+                      color: allDocumentsComplete
+                          ? completeColor
+                          : incompleteColor,
+                    ),
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 18),
+                      child: Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+                          Text("Dat Limit: ${task['dueDate']}"),
+                          SizedBox(height: 8),
+                          Text(task['description']),
+                          SizedBox(height: 8),
+                          ...task['document'].entries.map((doc) {
+                            return ListTile(
+                              title: Text(doc.key),
+                              subtitle: Text(doc.value != null
+                                  ? 'Dokiman konplè'
+                                  : 'Dokiman enkonplè'),
+                              trailing: doc.value == null
+                                  ? ElevatedButton(
+                                  onPressed: () => _pickDocument(
+                                      index, doc.key),
+                                  child: Text('Metel'))
+                                  : Row(
+                                mainAxisSize:
+                                MainAxisSize.min,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        _viewDocument(
+                                            index, doc.key),
+                                    child: Text('Gadel'),
+                                  ),
+                                  SizedBox(width: 10),
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        _removeDocument(
+                                            index, doc.key),
+                                    child: Text('Retirel'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
-    ) : LoadingPage();
+    )
+        : LoadingPage();
   }
 
   Widget buildDocumentCard(String doc, List<String> tasks) {
@@ -205,38 +354,6 @@ class _AssistancePageState extends State<AssistancePage> {
     );
   }
 
-  Widget buildPreviousAssistanceCard(Map<String, dynamic> assistance) {
-    String processTitle = assistance['processTitle'];
-    List documents = assistance['documents'];
-
-    bool isProcessComplete = documents.every((doc) => doc['isComplete']);
-    Color processColor = isProcessComplete ? completeColor : incompleteColor;
-
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.symmetric(vertical: 8),
-      child: ExpansionTile(
-        title: Text(processTitle, style: TextStyle(color: processColor)),
-        children: [
-          ...documents.map((doc) {
-            return ListTile(
-              title: Text(doc['documentName']),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(doc['isComplete'] ? 'Dokiman konplè' : 'Dokiman inkonplete'),
-                  Text(doc['isFileUploaded'] ? 'Dokiman telechaje' : 'Dokiman pa telechaje'),
-                  SizedBox(height: 8),
-                  Text("Feedback: ${doc['feedback']}", style: TextStyle(color: userInfoEmailColor)),
-                ],
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
   bool shouldShowPayment() {
     bool hasIncompleteTasksWithoutUpload = widget.requiredDocuments.any((doc) {
       return doc.keys.any((docKey) {
@@ -283,10 +400,10 @@ class _AssistancePageState extends State<AssistancePage> {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Pèman an fèt ak siksè!")),
                 );
+                Navigator.pop(context);
               },
               child: Text("Peye"),
             ),

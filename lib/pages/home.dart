@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:eassistance/models/user.dart';
-import 'package:eassistance/components/taks.dart';
 import 'package:eassistance/constant/colors.dart';
 import 'package:eassistance/constant/session.dart';
 import 'package:eassistance/constant/loading.dart';
 import 'package:eassistance/components/report.dart';
 import 'package:eassistance/components/message.dart';
-import 'package:eassistance/components/analytic.dart';
 import 'package:eassistance/components/calendar.dart';
 import 'package:eassistance/components/notification.dart';
 
@@ -21,6 +19,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   UserModel? session = null;
   final SessionManager _sessionManager = SessionManager();
+  final int notificationCount = 5; // Example notification count
+  final int messageCount = 2; // Example message count
 
   @override
   void initState() {
@@ -53,38 +53,101 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // User Info Card
-              Card(
+                Card(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundImage: NetworkImage('${session?.photoURL}'), // Example profile image
-                      ),
-                      SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${session?.displayName}',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundImage: NetworkImage('${session?.photoURL}'), // Example profile image
+                    ),
+                    SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${session?.displayName}',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '${session?.email}',
+                          style: TextStyle(color: userInfoEmailColor),
+                        ),
+                      ],
+                    ),
+                    Spacer(),
+                    // Notifications and Messages
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.notifications_active),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => NotificationsPage()),
+                            );
+                          },
+                        ),
+                        if (notificationCount > 0)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: CircleAvatar(
+                              radius: 8,
+                              backgroundColor: Colors.red,
+                              child: Text(
+                                '$notificationCount',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
-                          Text(
-                            '${session?.email}',
-                            style: TextStyle(color: userInfoEmailColor),
+                      ],
+                    ),
+                    SizedBox(width: 16),
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.message),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => MessagePage()),
+                            );
+                          },
+                        ),
+                        if (messageCount > 0)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: CircleAvatar(
+                              radius: 8,
+                              backgroundColor: Colors.red,
+                              child: Text(
+                                '$messageCount',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
+            ),
               SizedBox(height: 20),
 
               Text(
@@ -120,34 +183,10 @@ class _HomePageState extends State<HomePage> {
                       ReportPage()
                   ),
                   _buildDashboardCard(
-                      'Notifikasyon',
-                      Icons.notifications_active,
-                      notificationMenuColor, context,
-                      NotificationsPage()
-                  ),
-                  _buildDashboardCard(
-                      'Analitik',
-                      Icons.analytics,
-                      analyticMenuColor, context,
-                      AnalyticsPage()
-                  ),
-                  _buildDashboardCard(
                       'Kalandriye',
                       Icons.calendar_today,
                       calendarMenuColor, context,
                       CalendarPage()
-                  ),
-                  _buildDashboardCard(
-                      'Tach',
-                      Icons.task_alt,
-                      taskMenuColor, context,
-                      TaskPage()
-                  ),
-                  _buildDashboardCard(
-                      'Mesaj',
-                      Icons.message,
-                      messageMenuColor, context,
-                      MessagePage()
                   ),
                 ],
               ),
