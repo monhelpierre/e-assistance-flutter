@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('eassistance'),
+        title: Text('Eassistance'),
         backgroundColor: bgColor,
       ),
       body: _pages[_currentIndex],

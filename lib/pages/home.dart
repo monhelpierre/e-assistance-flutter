@@ -71,12 +71,16 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${session?.displayName}',
+                          '${session!.displayName!.length > 13
+                              ? "${session?.displayName!.split(' ').first}"
+                              : session?.displayName}',
                           style: TextStyle(
                               fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '${session?.email}',
+                          '${session!.email!.length > 22
+                              ? "${session?.email!.substring(0, 9)}...@${session?.email!.split('@').last}"
+                              : session?.email}',
                           style: TextStyle(fontSize: 10, color: userInfoEmailColor),
                         ),
                       ],
