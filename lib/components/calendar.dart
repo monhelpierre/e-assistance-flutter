@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/constant/session.dart';
+import 'package:eassistance/services/calendar.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -8,18 +11,29 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  // Example state: Current month displayed
+  UserModel? session = null;
   int _currentMonth = DateTime.now().month;
   int _currentYear = DateTime.now().year;
+  final Map<int, List<String>> _events = eventsList;
+  final SessionManager _sessionManager = SessionManager();
 
-  // Example list of events for demonstration
-  final Map<int, List<String>> _events = {
-    1: ['New Year\'s Day', 'Winter Break'],
-    5: ['Labor Day'],
-    12: ['Christmas'],
-  };
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
 
-  // Function to change month
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+    if (session == null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } else {
+      setState(() {
+        this.session = session;
+      });
+    }
+  }
+
   void _changeMonth(int change) {
     setState(() {
       _currentMonth += change;
@@ -44,7 +58,6 @@ class _CalendarPageState extends State<CalendarPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Calendar Header (Month and Year)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -67,7 +80,6 @@ class _CalendarPageState extends State<CalendarPage> {
             ),
             SizedBox(height: 20),
 
-            // Calendar (Placeholder)
             Container(
               padding: EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
@@ -76,15 +88,14 @@ class _CalendarPageState extends State<CalendarPage> {
               ),
               child: Column(
                 children: [
-                  // Days of the Week (Mon, Tue, etc.)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      for (var day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
+                      for (var day in daysList)
                         Text(day, style: TextStyle(fontWeight: FontWeight.bold)),
                     ],
                   ),
-                  // Dummy Calendar Dates (You can customize this further)
+
                   Wrap(
                     spacing: 8,
                     children: List.generate(30, (index) {
@@ -106,9 +117,8 @@ class _CalendarPageState extends State<CalendarPage> {
 
             SizedBox(height: 20),
 
-            // Events for the Month
             Text(
-              'Events for $_currentMonth/$_currentYear:',
+              'Evènman pou $_currentMonth/$_currentYear:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),

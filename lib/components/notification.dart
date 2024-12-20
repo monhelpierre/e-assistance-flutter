@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/constant/session.dart';
+import 'package:eassistance/services/notification.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -8,15 +11,27 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  // List of notifications (simulating different types)
-  final List<Map<String, String>> _notifications = [
-    {"type": "New Process", "message": "A new process has been started."},
-    {"type": "Payment Error", "message": "There was an error processing your payment."},
-    {"type": "New Message", "message": "You have a new message from the admin."},
-    {"type": "Assistance Feedback", "message": "Feedback has been received for your assistance request."},
-  ];
+  UserModel? session = null;
+  final SessionManager _sessionManager = SessionManager();
+  final List<Map<String, String>> _notifications = notificationsList;
 
-  // Function to add a new notification
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+    if (session == null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } else {
+      setState(() {
+        this.session = session;
+      });
+    }
+  }
+
   void _addNotification(String type, String message) {
     setState(() {
       _notifications.add({"type": type, "message": message});
@@ -36,31 +51,29 @@ class _NotificationsPageState extends State<NotificationsPage> {
           children: [
             // Title
             Text(
-              'Recent Notifications',
+              'Notifikasyon Resan',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
 
-            // Notifications list
             Expanded(
               child: ListView.builder(
                 itemCount: _notifications.length,
                 itemBuilder: (context, index) {
                   Map<String, String> notification = _notifications[index];
 
-                  // Assign a color based on notification type
                   Color notificationColor;
                   switch (notification['type']) {
-                    case "New Process":
+                    case "Nouvo Pwosesis":
                       notificationColor = Colors.blue;
                       break;
-                    case "Payment Error":
+                    case "Erè Pèman":
                       notificationColor = Colors.red;
                       break;
-                    case "New Message":
+                    case "Nouvo Mesaj":
                       notificationColor = Colors.green;
                       break;
-                    case "Assistance Feedback":
+                    case "Fidbak Asistans":
                       notificationColor = Colors.orange;
                       break;
                     default:
@@ -85,18 +98,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ),
             ),
 
-            // Button to simulate a new notification
             ElevatedButton(
               onPressed: () {
-                _addNotification("New Process", "A new process has been started.");
+                _addNotification("Nouvo Pwosesis", "Yon nouvo pwosesis ajoute.");
               },
-              child: Text('Add New Process Notification'),
+              child: Text('Ajoute Yon Nouvo Notifikasyon pou Pwosesis'),
             ),
             ElevatedButton(
               onPressed: () {
-                _addNotification("Payment Error", "There was an error processing your payment.");
+                _addNotification("Erè Pèman", "Genyen yon pwoblèm nan jere pèman an.");
               },
-              child: Text('Add Payment Error Notification'),
+              child: Text('Ajoute Yon Nouvo Notifikasyon pou Erè Pèman'),
             ),
           ],
         ),

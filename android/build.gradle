@@ -8,6 +8,8 @@ allprojects {
         dependencies {
             classpath 'com.google.gms:google-services:4.4.2'
         }
+
+
     }
 }
 
@@ -23,3 +25,7 @@ tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add("-Xlint:unchecked")
+    options.compilerArgs.add("-Xlint:deprecation")
+}

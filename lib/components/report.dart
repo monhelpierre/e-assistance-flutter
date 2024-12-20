@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/constant/session.dart';
+import 'package:eassistance/services/report.dart';
 
 class ReportPage extends StatefulWidget {
   const ReportPage({super.key});
@@ -8,15 +11,27 @@ class ReportPage extends StatefulWidget {
 }
 
 class _ReportPageState extends State<ReportPage> {
-  // List of reports (simulating different report types)
-  final List<Map<String, String>> _reports = [
-    {"title": "Monthly Sales", "description": "Report for monthly sales performance."},
-    {"title": "Payment Overview", "description": "Overview of all payments made during the last month."},
-    {"title": "User Engagement", "description": "Report on user engagement across the platform."},
-    {"title": "System Performance", "description": "Overview of system performance metrics."},
-  ];
+  UserModel? session = null;
+  final List<Map<String, String>> _reports = reportsList;
+  final SessionManager _sessionManager = SessionManager();
 
-  // Function to simulate adding a new report
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+    if (session == null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } else {
+      setState(() {
+        this.session = session;
+      });
+    }
+  }
+
   void _addReport(String title, String description) {
     setState(() {
       _reports.add({"title": title, "description": description});
@@ -34,14 +49,12 @@ class _ReportPageState extends State<ReportPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
             Text(
-              'Recent Reports',
+              'Rapò Resan',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
 
-            // Reports list
             Expanded(
               child: ListView.builder(
                 itemCount: _reports.length,
@@ -58,7 +71,7 @@ class _ReportPageState extends State<ReportPage> {
                       title: Text(report['title']!, style: TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(report['description']!),
                       onTap: () {
-                        // Handle tapping on a report (e.g., navigate to report details)
+
                       },
                     ),
                   );
@@ -66,18 +79,17 @@ class _ReportPageState extends State<ReportPage> {
               ),
             ),
 
-            // Button to simulate adding a new report
             ElevatedButton(
               onPressed: () {
-                _addReport("Monthly Sales", "Report for monthly sales performance.");
+                _addReport("Rapò Mansyèl", "Rapò mansyel pou pèfòmans asistans.");
               },
-              child: Text('Add Monthly Sales Report'),
+              child: Text('Ajoute Yon Nouvo Rapò'),
             ),
             ElevatedButton(
               onPressed: () {
-                _addReport("User Engagement", "Report on user engagement across the platform.");
+                _addReport("Angajman Itilizatè", "Rapò sou angajman itilizatè sou platfòm lan.");
               },
-              child: Text('Add User Engagement Report'),
+              child: Text('Ajoute Yon Nouvo Angajman Itilizatè'),
             ),
           ],
         ),

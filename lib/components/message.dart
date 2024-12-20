@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/constant/session.dart';
+import 'package:eassistance/services/message.dart';
 
 class MessagePage extends StatefulWidget {
   const MessagePage({super.key});
@@ -8,16 +11,28 @@ class MessagePage extends StatefulWidget {
 }
 
 class _MessagePageState extends State<MessagePage> {
-  // Controller to manage input field for typing messages
+  UserModel? session = null;
   final TextEditingController _messageController = TextEditingController();
+  final List<Map<String, String>> _messages = messagesList;
+  final SessionManager _sessionManager = SessionManager();
 
-  // List to simulate messages (user and admin)
-  final List<Map<String, String>> _messages = [
-    {"sender": "admin", "message": "Hello! How can I assist you today?"},
-    {"sender": "user", "message": "I need help with my account."},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
 
-  // Function to send a new message
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+    if (session == null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } else {
+      setState(() {
+        this.session = session;
+      });
+    }
+  }
+
   void _sendMessage() {
     if (_messageController.text.isNotEmpty) {
       setState(() {
@@ -27,7 +42,8 @@ class _MessagePageState extends State<MessagePage> {
       // Simulate admin reply after a short delay
       Future.delayed(Duration(seconds: 1), () {
         setState(() {
-          _messages.add({"sender": "admin", "message": "Can you provide more details?"});
+          _messages.add(
+              {"sender": "admin", "message": "Ou ka bay plis detay?"});
         });
       });
     }
@@ -43,7 +59,6 @@ class _MessagePageState extends State<MessagePage> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            // Chat messages list
             Expanded(
               child: ListView.builder(
                 itemCount: _messages.length,
@@ -52,9 +67,11 @@ class _MessagePageState extends State<MessagePage> {
                   bool isUser = message['sender'] == 'user';
 
                   return Align(
-                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment: isUser ? Alignment.centerRight : Alignment
+                        .centerLeft,
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      padding: EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 12),
                       margin: EdgeInsets.symmetric(vertical: 4),
                       decoration: BoxDecoration(
                         color: isUser ? Colors.blue[200] : Colors.grey[200],
@@ -62,7 +79,8 @@ class _MessagePageState extends State<MessagePage> {
                       ),
                       child: Text(
                         message['message']!,
-                        style: TextStyle(color: isUser ? Colors.white : Colors.black),
+                        style: TextStyle(color: isUser ? Colors.white : Colors
+                            .black),
                       ),
                     ),
                   );
@@ -70,7 +88,6 @@ class _MessagePageState extends State<MessagePage> {
               ),
             ),
 
-            // Input field and send button
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Row(
@@ -79,7 +96,7 @@ class _MessagePageState extends State<MessagePage> {
                     child: TextField(
                       controller: _messageController,
                       decoration: InputDecoration(
-                        hintText: 'Type a message...',
+                        hintText: 'Ekri yon mesaj...',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),

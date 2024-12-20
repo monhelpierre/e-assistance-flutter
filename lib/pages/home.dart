@@ -1,26 +1,48 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:eassistance/components/analytic.dart';
-import 'package:eassistance/components/calendar.dart';
-import 'package:eassistance/components/message.dart';
-import 'package:eassistance/components/notification.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/constant/colors.dart';
+import 'package:eassistance/constant/session.dart';
+import 'package:eassistance/constant/loading.dart';
 import 'package:eassistance/components/report.dart';
-import 'package:eassistance/components/taks.dart';
+import 'package:eassistance/components/message.dart';
+import 'package:eassistance/components/calendar.dart';
+import 'package:eassistance/components/notification.dart';
 
 class HomePage extends StatefulWidget {
-  final User? user;
   final Function(int) updateIndex;
-
-  const HomePage({super.key, required this.user, required this.updateIndex});
+  const HomePage({super.key, required this.updateIndex});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  UserModel? session = null;
+  final SessionManager _sessionManager = SessionManager();
+  final int notificationCount = 5; // Example notification count
+  final int messageCount = 2; // Example message count
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+    if(session == null){
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }else{
+      setState(() {
+        this.session = session;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+
+    return this.session != null? Scaffold(
       appBar: AppBar(
         title: Text('Dashboard'),
       ),
@@ -31,48 +53,109 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // User Info Card
-              Card(
+                Card(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundImage: NetworkImage('${widget.user?.photoURL}'), // Example profile image
-                      ),
-                      SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${widget.user?.displayName}',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundImage: NetworkImage('${session?.photoURL}'), // Example profile image
+                    ),
+                    SizedBox(width: 5),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${session?.displayName}',
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '${session?.email}',
+                          style: TextStyle(fontSize: 10, color: userInfoEmailColor),
+                        ),
+                      ],
+                    ),
+                    SizedBox(width: 35),
+                    // Notifications and Messages
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.notifications_active),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => NotificationsPage()),
+                            );
+                          },
+                        ),
+                        if (notificationCount > 0)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: CircleAvatar(
+                              radius: 8,
+                              backgroundColor: Colors.red,
+                              child: Text(
+                                '$notificationCount',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
-                          Text(
-                            '${widget.user?.email}',
-                            style: TextStyle(color: Colors.grey[600]),
+                      ],
+                    ),
+                    SizedBox(width: 5),
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.message),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => MessagePage()),
+                            );
+                          },
+                        ),
+                        if (messageCount > 0)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: CircleAvatar(
+                              radius: 8,
+                              backgroundColor: Colors.red,
+                              child: Text(
+                                '$messageCount',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
+            ),
               SizedBox(height: 20),
 
-              // Dashboard Title
               Text(
                 'Aksyon Rapid',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
 
-              // Dashboard Menu Items
               GridView(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
@@ -86,48 +169,24 @@ class _HomePageState extends State<HomePage> {
                   _buildDashboardCard(
                       'Pwosesis',
                       Icons.work_outline,
-                      Colors.blue, context, null
+                      processMenuColor, context, null
                   ),
                   _buildDashboardCard(
                       'Asistans',
                       Icons.support_agent,
-                      Colors.orange, context, null
+                      assistanceMenuColor, context, null
                   ),
                   _buildDashboardCard(
                       'Rapò',
                       Icons.bar_chart,
-                      Colors.teal, context,
+                      reportMenuColor, context,
                       ReportPage()
-                  ),
-                  _buildDashboardCard(
-                      'Notifikasyon',
-                      Icons.notifications_active,
-                      Colors.red, context,
-                      NotificationsPage()
-                  ),
-                  _buildDashboardCard(
-                      'Analitik',
-                      Icons.analytics,
-                      Colors.indigo, context,
-                      AnalyticsPage()
                   ),
                   _buildDashboardCard(
                       'Kalandriye',
                       Icons.calendar_today,
-                      Colors.deepOrange, context,
+                      calendarMenuColor, context,
                       CalendarPage()
-                  ),
-                  _buildDashboardCard(
-                      'Tach',
-                      Icons.task_alt,
-                      Colors.cyan, context,
-                      TaskPage()
-                  ),
-                  _buildDashboardCard(
-                      'Mesaj',
-                      Icons.message,
-                      Colors.pink, context,
-                      MessagePage()
                   ),
                 ],
               ),
@@ -135,10 +194,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-    );
+    ) : LoadingPage();
   }
 
-  // Helper method to create dashboard cards
   Widget _buildDashboardCard(String title, IconData icon, Color color, BuildContext context, Widget? page) {
     return GestureDetector(
       onTap: () {

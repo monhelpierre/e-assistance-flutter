@@ -1,59 +1,84 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:eassistance/models/user.dart';
+import 'package:eassistance/constant/colors.dart';
+import 'package:eassistance/constant/loading.dart';
+import 'package:eassistance/constant/session.dart';
 
 class SettingPage extends StatefulWidget {
-  final User? user;
-
-  const SettingPage({super.key, required this.user});
-
   @override
   State<SettingPage> createState() => _SettingPageState();
 }
 
 class _SettingPageState extends State<SettingPage> {
-  // User information fields
   String? name;
   String? email;
   String? phone;
-
-  // Selected options
-  String selectedProgram = "Imigrasyon";
+  String defaultLang = "ht";
   String selectedLevel = "Lisans";
+  String selectedProgram = "Imigrasyon";
+
+  UserModel? session = null;
+  bool? enableNotification = false;
+  final SessionManager _sessionManager = SessionManager();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    UserModel? session = await _sessionManager.getSession();
+    if (session == null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } else {
+      setState(() {
+        this.session = session;
+        this.enableNotification = session.enableNotification;
+      });
+    }
+  }
+
+  Future<void> _signOut() async {
+    await _sessionManager.clearSession();
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
+    return session != null? Scaffold(
       appBar: AppBar(
         title: Text('Paramèt'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: ListView(
           children: [
-            // Section: User Info
             buildSectionTitle("Enfòmasyon Itilizatè"),
-            buildTextField("Non", widget.user?.displayName, (value) {
+            buildTextField("Non", session?.displayName, (value) {
               setState(() {
                 name = value;
               });
             }),
+
             SizedBox(height: 12),
-            buildTextField("Imel", widget.user?.email, (value) {
+
+            buildTextField("Imel", session?.email, (value) {
               setState(() {
                 email = value;
               });
             }),
+
             SizedBox(height: 12),
-            buildTextField("Telefòn", widget.user?.phoneNumber, (value) {
+
+            buildTextField("Telefòn", session?.phoneNumber, (value) {
               setState(() {
                 phone = value;
               });
             }),
 
-            SizedBox(height: 20),
+            SizedBox(height: 12),
 
-            // Section: Program Selection
             buildSectionTitle("Seleksyon Pwogram"),
             buildDropdown(
               "Tip Pwogram",
@@ -65,7 +90,9 @@ class _SettingPageState extends State<SettingPage> {
                 });
               },
             ),
+
             SizedBox(height: 12),
+
             if (selectedProgram == "Pwogram Etid")
               buildDropdown(
                 "Study Level",
@@ -78,34 +105,63 @@ class _SettingPageState extends State<SettingPage> {
                 },
               ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 12),
 
-            // Section: Other Settings
+            buildSectionTitle("Lang Prensipal"),
+            buildDropdown(
+              "Lang",
+              ["ht", "fr", "pt", "en"],
+              defaultLang,
+                  (value) {
+                setState(() {
+                  defaultLang = value!;
+                });
+              },
+            ),
+            SizedBox(height: 12),
+
             buildSectionTitle("Lòt Paramèt"),
             SwitchListTile(
               title: Text("Aktive Notifikasyon"),
-              value: true,
+              value: this.enableNotification as bool,
               onChanged: (value) {
-                // Handle notification toggle
+                setState(() {
+                  this.enableNotification = ! (this.enableNotification as bool);
+                });
               },
             ),
-
             SizedBox(height: 20),
-
-            // Save Button
-            ElevatedButton(
-              onPressed: () {
-                saveSettings();
-              },
-              child: Text("Anrejistre Paramèt"),
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      saveSettings();
+                    },
+                    child: Text("Anrejistre Paramèt"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      _signOut();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: errorColor,
+                    ),
+                    child: Text(
+                      "Dekonekte",
+                      style: TextStyle(color: bgColor),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
       ),
-    );
+    ) : LoadingPage();
   }
 
-  // Build a section title
   Widget buildSectionTitle(String? title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -119,7 +175,6 @@ class _SettingPageState extends State<SettingPage> {
     );
   }
 
-  // Build a text field for user info
   Widget buildTextField(
       String label, String? initialValue, Function(String) onChanged) {
     return TextField(
@@ -129,12 +184,11 @@ class _SettingPageState extends State<SettingPage> {
       ),
       controller: TextEditingController(text: initialValue)
         ..selection = TextSelection.fromPosition(
-            TextPosition(offset: initialValue != null? initialValue.length : 0)),
+            TextPosition(offset: initialValue != null ? initialValue.length : 0)),
       onChanged: onChanged,
     );
   }
 
-  // Build a dropdown for program selection
   Widget buildDropdown(String label, List<String> options, String value,
       Function(String?) onChanged) {
     return DropdownButtonFormField<String>(
@@ -153,9 +207,7 @@ class _SettingPageState extends State<SettingPage> {
     );
   }
 
-  // Save settings function
   void saveSettings() {
-    // Simulate saving the settings
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

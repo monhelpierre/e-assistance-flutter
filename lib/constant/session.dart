@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
+import 'package:eassistance/models/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,50 +30,23 @@ class SessionManager {
     return null;
   }
 
-  Future<void> deleteSession() async {
+  Future<void> clearSession() async {
     final prefs = await SharedPreferences.getInstance();
+    await FirebaseAuth.instance.signOut();
     await prefs.remove(_sessionKey);
   }
-}
 
-class UserModel {
-  final String uid;
-  final String? email;
-  final String? displayName;
-  final String? photoURL;
-  final String? phoneNumber;
-  final bool isAnonymous;
-
-  UserModel({
-    required this.uid,
-    this.email,
-    this.displayName,
-    this.photoURL,
-    this.phoneNumber,
-    required this.isAnonymous,
-  });
-
-  // Convert the UserModel to a map
-  Map<String, dynamic> toMap() {
-    return {
-      'uid': uid,
-      'email': email,
-      'displayName': displayName,
-      'photoURL': photoURL,
-      'phoneNumber': phoneNumber,
-      'isAnonymous': isAnonymous,
-    };
-  }
-
-  // Create a UserModel from a map
-  factory UserModel.fromMap(Map<String, dynamic> map) {
-    return UserModel(
-      uid: map['uid'],
-      email: map['email'],
-      displayName: map['displayName'],
-      photoURL: map['photoURL'],
-      phoneNumber: map['phoneNumber'],
-      isAnonymous: map['isAnonymous'],
-    );
+  Future<UserModel?> getSessionFromLogin(BuildContext context) async {
+    UserModel? session = await getSession();
+    if(session == null){
+      User? user = FirebaseAuth.instance.currentUser;
+      if(user != null){
+        await saveSession(user);
+        return UserModel.fromFirebaseUser(user);
+      }
+      return null;
+    }else {
+      return session;
+    }
   }
 }
