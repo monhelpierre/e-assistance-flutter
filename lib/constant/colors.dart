@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+Color logoBgColor = Colors.transparent;
+Color loginWelcomeTextColor = Colors.black87;
+Color connectToContinueColor = Colors.black54;
+Color buttonBorderColor = Colors.black12;
+
 Color bgColor = Colors.white;
 Color? forgetPasswordColor = Colors.red[500];
 Color? normalTextColor = Colors.black;

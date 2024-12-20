@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eassistance/pages/home.dart';
-import 'package:eassistance/auth/login.dart';
-import 'package:eassistance/auth/forget.dart';
-import 'package:eassistance/auth/signup.dart';
+import 'package:eassistance/pages/login.dart';
 import 'package:eassistance/pages/payment.dart';
 import 'package:eassistance/pages/process.dart';
 import 'package:eassistance/pages/setting.dart';
@@ -19,8 +17,6 @@ void main() async {
     initialRoute: '/login',
     routes: {
       '/': (context) => MyApp(),
-      '/forgot': (context) => ForgetPage(),
-      '/signup': (context) => SignupPage(),
       '/login': (context) => LoginPage(),
     },
   ));

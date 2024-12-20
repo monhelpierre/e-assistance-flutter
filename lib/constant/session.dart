@@ -32,6 +32,7 @@ class SessionManager {
 
   Future<void> clearSession() async {
     final prefs = await SharedPreferences.getInstance();
+    await FirebaseAuth.instance.signOut();
     await prefs.remove(_sessionKey);
   }
 
