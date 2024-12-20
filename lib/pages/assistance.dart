@@ -236,26 +236,26 @@ class _AssistancePageState extends State<AssistancePage> {
                                   ? 'Dokiman konplè'
                                   : 'Dokiman enkonplè'),
                               trailing: doc.value == null
-                                  ? ElevatedButton(
-                                  onPressed: () => _pickDocument(
-                                      index, doc.key),
-                                  child: Text('Metel'))
+                                  ? GestureDetector(
+                                onTap: () => _pickDocument(index, doc.key),
+                                child: Icon(Icons.add, color: completeColor),
+                              )
                                   : Row(
                                 mainAxisSize:
                                 MainAxisSize.min,
                                 children: [
-                                  ElevatedButton(
-                                    onPressed: () =>
+                                  GestureDetector(
+                                    onTap: () =>
                                         _viewDocument(
                                             index, doc.key),
-                                    child: Text('Gadel'),
+                                    child: Icon(Icons.remove_red_eye),
                                   ),
-                                  SizedBox(width: 10),
-                                  ElevatedButton(
-                                    onPressed: () =>
+                                  SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () =>
                                         _removeDocument(
                                             index, doc.key),
-                                    child: Text('Retirel'),
+                                    child: Icon(Icons.close, color: errorColor),
                                   ),
                                 ],
                               ),

@@ -66,22 +66,22 @@ class _HomePageState extends State<HomePage> {
                       radius: 30,
                       backgroundImage: NetworkImage('${session?.photoURL}'), // Example profile image
                     ),
-                    SizedBox(width: 16),
+                    SizedBox(width: 5),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           '${session?.displayName}',
                           style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
+                              fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           '${session?.email}',
-                          style: TextStyle(color: userInfoEmailColor),
+                          style: TextStyle(fontSize: 10, color: userInfoEmailColor),
                         ),
                       ],
                     ),
-                    Spacer(),
+                    SizedBox(width: 35),
                     // Notifications and Messages
                     Stack(
                       clipBehavior: Clip.none,
@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                       ],
                     ),
-                    SizedBox(width: 16),
+                    SizedBox(width: 5),
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
